@@ -7,7 +7,7 @@ module.exports = {
 
     // First application
     {
-      name      : 'answer-graphql-connector',
+      name      : 'aggregator',
       script    : 'src/index.js',
       exec_interpreter: '/home/deploy/.nvm/versions/node/v8.7.0/bin/node',
       env: {
