@@ -143,6 +143,7 @@ async function run() {
         "INSERT INTO aggregator_visits",
         { format: "JSONEachRow" },
         err => {
+          console.log(err)
           if (!err) {
             visitsRawData.forEach(([msg]) => amqpCh.ack(msg))
           }
