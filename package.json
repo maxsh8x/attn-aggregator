@@ -1,0 +1,27 @@
+{
+  "name": "aggregator-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=production node src/index.js",
+    "watch": "nodemon -w src -x node src/index.js",
+    "dev": "NODE_ENV=dev npm run watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apla/clickhouse": "^1.5.0",
+    "amqplib": "^0.5.2",
+    "body-parser": "^1.18.2",
+    "clickhouse": "^1.1.4",
+    "express": "^4.16.2",
+    "geoip-lite": "^1.2.1",
+    "mongoose": "^4.13.7",
+    "mongoose-sequence": "^4.0.1",
+    "ua-parser-js": "^0.7.17"
+  },
+  "devDependencies": {
+    "nodemon": "^1.13.3"
+  }
+}

@@ -1,0 +1,176 @@
+<dictionaries>
+    <dictionary>
+        <name>events</name>
+
+        <source>
+            <mongodb>
+                <host>localhost</host>
+                <port>27017</port>
+                <user></user>
+                <password></password>
+                <db>aggregator</db>
+                <collection>events</collection>
+            </mongodb>
+        </source>
+
+        <layout>
+            <flat/>
+        </layout>
+
+        <structure>
+
+            <id>
+                <name>code</name>
+            </id>
+            <attribute>
+                <name>name</name>
+                <type>String</type>
+            </attribute>
+
+        </structure>
+
+        <lifetime>
+            <lifetime>300</lifetime>
+        </lifetime>
+    </dictionary>
+
+    <dictionary>
+        <name>browsers</name>
+
+        <source>
+            <mongodb>
+                <host>localhost</host>
+                <port>27017</port>
+                <user></user>
+                <password></password>
+                <db>aggregator</db>
+                <collection>browsers</collection>
+            </mongodb>
+        </source>
+
+        <layout>
+            <flat/>
+        </layout>
+
+        <structure>
+
+            <id>
+                <name>code</name>
+            </id>
+            <attribute>
+                <name>name</name>
+                <type>String</type>
+            </attribute>
+
+        </structure>
+
+        <lifetime>
+            <lifetime>300</lifetime>
+        </lifetime>
+    </dictionary>
+
+    <dictionary>
+        <name>devicetypes</name>
+
+        <source>
+            <mongodb>
+                <host>localhost</host>
+                <port>27017</port>
+                <user></user>
+                <password></password>
+                <db>aggregator</db>
+                <collection>devicetypes</collection>
+            </mongodb>
+        </source>
+
+        <layout>
+            <flat/>
+        </layout>
+
+        <structure>
+
+            <id>
+                <name>code</name>
+            </id>
+            <attribute>
+                <name>name</name>
+                <type>String</type>
+            </attribute>
+
+        </structure>
+
+        <lifetime>
+            <lifetime>300</lifetime>
+        </lifetime>
+    </dictionary>
+
+    <dictionary>
+        <name>devicevendors</name>
+
+        <source>
+            <mongodb>
+                <host>localhost</host>
+                <port>27017</port>
+                <user></user>
+                <password></password>
+                <db>aggregator</db>
+                <collection>devicevendors</collection>
+            </mongodb>
+        </source>
+
+        <layout>
+            <flat/>
+        </layout>
+
+        <structure>
+
+            <id>
+                <name>code</name>
+            </id>
+            <attribute>
+                <name>name</name>
+                <type>String</type>
+            </attribute>
+
+        </structure>
+
+        <lifetime>
+            <lifetime>300</lifetime>
+        </lifetime>
+    </dictionary>
+
+    <dictionary>
+        <name>operationsystems</name>
+
+        <source>
+            <mongodb>
+                <host>localhost</host>
+                <port>27017</port>
+                <user></user>
+                <password></password>
+                <db>aggregator</db>
+                <collection>operationsystems</collection>
+            </mongodb>
+        </source>
+
+        <layout>
+            <flat/>
+        </layout>
+
+        <structure>
+
+            <id>
+                <name>code</name>
+            </id>
+            <attribute>
+                <name>name</name>
+                <type>String</type>
+            </attribute>
+
+        </structure>
+
+        <lifetime>
+            <lifetime>300</lifetime>
+        </lifetime>
+    </dictionary>
+</dictionaries>

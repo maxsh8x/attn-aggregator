@@ -1,0 +1,11 @@
+{
+  "port": 3001,
+  "clickhouse": {
+    "url": "http://localhost",
+    "port": 8123
+  },
+  "amqp": {
+    "host": "amqp://127.0.0.1"
+  },
+  "mongoUri": "mongodb://127.0.0.1/aggregator"
+}

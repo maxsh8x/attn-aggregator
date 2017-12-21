@@ -1,0 +1,7 @@
+{
+  "userId": 1,
+  "app": "theanswer",
+  "event": "LIKE",
+  "questionId": 1,
+  "answerId": 1
+}
