@@ -155,6 +155,7 @@ async function run() {
         const date = new Date(visitsRawData[i][1].timestamp * 1000);
         clickhouseStream.write({
           ip: visitsRawData[i][1].ip,
+          ua: visitsRawData[i][1].ua,
           referer: visitsRawData[i][1].referer,
           browserName: convertToInt("browser", browser.name),
           browserMajorVersion: browser.major || 0,
