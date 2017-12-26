@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const parser = require("ua-parser-js");
 const bodyParser = require("body-parser");
 const ClickHouse = require("@apla/clickhouse");
+const { URL } = require('url');
 
 const config = require("./utils/config");
 const models = require("./models");
@@ -32,8 +33,8 @@ async function run() {
   amqpCh.consume("visits", msg => {
     const data = JSON.parse(msg.content);
     const timestamp = msg.properties.timestamp;
-    const { userId, ua, ip, referer, app } = data;
-    visitsBuff.push([msg, { userId, ua, ip, referer, app, timestamp }]);
+    const { userId, ua, ip, referer, app, pageUrl } = data;
+    visitsBuff.push([msg, { userId, ua, ip, referer, app, timestamp, pageUrl }]);
   });
 
   const eventsBuff = [];
@@ -85,9 +86,11 @@ async function run() {
     const dicts = {
       event: new Map(),
       browser: new Map(),
+      UTM_Medium: new Map(),
+      UTM_Source: new Map(),
       deviceType: new Map(),
       deviceVendor: new Map(),
-      operationSystem: new Map()
+      operationSystem: new Map(),
     };
 
     const eventDictData = await models.Event.find({}, "-_id code name");
@@ -126,9 +129,26 @@ async function run() {
       dicts.operationSystem.set(name, code);
     }
 
+    const UTM_MediumData = await models.OperationSystem.find(
+      {},
+      "-_id code name"
+    );
+    for (let i = 0; i < UTM_MediumData.length; i++) {
+      const { code, name } = UTM_MediumData[i];
+      dicts.UTM_Medium.set(name, code);
+    }
+
+    const UTM_SourceData = await models.OperationSystem.find(
+      {},
+      "-_id code name"
+    );
+    for (let i = 0; i < UTM_SourceData.length; i++) {
+      const { code, name } = UTM_SourceData[i];
+      dicts.UTM_Source.set(name, code);
+    }
     
     const convertToInt = (dict, value) => {
-      if (typeof value === "undefined") {
+      if (typeof value === "undefined" || value === null) {
         return 0;
       }
       const convertedValue = dicts[dict].get(value.toLowerCase());
@@ -153,9 +173,19 @@ async function run() {
         const { browser, device, os } = parser(visitsRawData[i][1].ua);
         const { ll } = geoip.lookup(visitsRawData[i][1].ip);
         const date = new Date(visitsRawData[i][1].timestamp * 1000);
+        const sourceURL = new URL(visitsRawData[i][1].pageUrl);
+
         clickhouseStream.write({
+          userId: visitsRawData[i][1].userId,
+          app: visitsRawData[i][1].appId,
           ip: visitsRawData[i][1].ip,
           referer: visitsRawData[i][1].referer,
+          pagePath: sourceURL.pathname,
+          UTM_Source: convertToInt('UTM_Source', sourceURL.searchParams.get('utm_source')), 
+          UTM_Medium: convertToInt('UTM_Medium', sourceURL.searchParams.get('utm_medium')), 
+          UTM_Campaign: sourceURL.searchParams.get('utm_campaign') || '', 
+          UTM_Content: sourceURL.searchParams.get('utm_content') || '', 
+          UTM_Term: sourceURL.searchParams.get('utm_term') || '', 
           browserName: convertToInt("browser", browser.name),
           browserMajorVersion: browser.major || 0,
           deviceType: convertToInt("deviceType", device.type),
