@@ -8,7 +8,7 @@ CREATE TABLE aggregator_visits
     pagePath String,
     UTM_Source UInt8,
     UTM_Medium UInt8,
-    UTM_Campaign UInt8,
+    UTM_Campaign String,
     UTM_Content String,
     UTM_Term String,
     browserName UInt16,

@@ -7,5 +7,14 @@
   "amqp": {
     "host": "amqp://127.0.0.1"
   },
-  "mongoUri": "mongodb://127.0.0.1/aggregator"
+  "mongoUri": "mongodb://127.0.0.1/aggregator",
+  "dictionaries": [
+    "event",
+    "browser",
+    "UTM_Medium",
+    "UTM_Source",
+    "deviceType",
+    "deviceVendor",
+    "operationSystem"
+  ]
 }

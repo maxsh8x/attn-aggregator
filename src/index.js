@@ -5,9 +5,11 @@ const mongoose = require("mongoose");
 const parser = require("ua-parser-js");
 const bodyParser = require("body-parser");
 const ClickHouse = require("@apla/clickhouse");
-const { URL } = require('url');
+const { URL } = require("url");
 
 const config = require("./utils/config");
+const { convertToInt } = require("./utils/converter");
+const { initDicts } = require("./utils/dicts");
 const models = require("./models");
 
 const app = express();
@@ -15,9 +17,6 @@ app.use(bodyParser.json());
 
 mongoose.connect(config.mongoUri, { useMongoClient: true });
 mongoose.Promise = global.Promise;
-
-const toISODate = unixTime =>
-  new Date(unixTime * 1000).toISOString().slice(0, 10);
 
 async function run() {
   const amqpConn = await amqp.connect(config.amqp.host);
@@ -34,7 +33,10 @@ async function run() {
     const data = JSON.parse(msg.content);
     const timestamp = msg.properties.timestamp;
     const { userId, ua, ip, referer, app, pageUrl } = data;
-    visitsBuff.push([msg, { userId, ua, ip, referer, app, timestamp, pageUrl }]);
+    visitsBuff.push([
+      msg,
+      { userId, ua, ip, referer, app, timestamp, pageUrl }
+    ]);
   });
 
   const eventsBuff = [];
@@ -53,45 +55,44 @@ async function run() {
     const data = JSON.parse(msg.content);
     const timestamp = msg.properties.timestamp;
     const { userId, fromUrl, toUrl, app } = data;
-    recommsBuff.push([
-      msg,
-      { userId, fromUrl, toUrl, app, timestamp }
-    ]);
+    recommsBuff.push([msg, { userId, fromUrl, toUrl, app, timestamp }]);
   });
 
   app.post("/api/v1/ua/", async function({ body: { ua } }, res) {
     const { browser, device, os } = parser(ua);
     const promises = [];
     if (browser.name) {
-      promises.push(new models.Browser({ name: browser.name.toLowerCase() }).save());
+      promises.push(
+        new models.Browser({ name: browser.name.toLowerCase() }).save()
+      );
     }
     if (device.type) {
-      promises.push(new models.DeviceType({ name: device.type.toLowerCase() }).save());
+      promises.push(
+        new models.DeviceType({ name: device.type.toLowerCase() }).save()
+      );
     }
     if (device.vendor) {
-      promises.push(new models.DeviceVendor({ name: device.vendor.toLowerCase() }).save());
+      promises.push(
+        new models.DeviceVendor({ name: device.vendor.toLowerCase() }).save()
+      );
     }
     if (os.name) {
-      promises.push(new models.OperationSystem({ name: os.name.toLowerCase() }).save());
+      promises.push(
+        new models.OperationSystem({ name: os.name.toLowerCase() }).save()
+      );
     }
     await Promise.all(promises).catch(err => console.error(err));
     res.send(JSON.stringify("ok", null, "  "));
   });
 
-  app.listen(config.port, () => console.info(`App listening on port ${config.port}!`));
+  app.listen(config.port, () =>
+    console.info(`App listening on port ${config.port}!`)
+  );
 
   const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   while (true) {
-    const dicts = {
-      event: new Map(),
-      browser: new Map(),
-      UTM_Medium: new Map(),
-      UTM_Source: new Map(),
-      deviceType: new Map(),
-      deviceVendor: new Map(),
-      operationSystem: new Map(),
-    };
+    const dicts = initDicts(config.dictionaries)
 
     const eventDictData = await models.Event.find({}, "-_id code name");
     for (let i = 0; i < eventDictData.length; i++) {
@@ -146,14 +147,6 @@ async function run() {
       const { code, name } = UTM_SourceData[i];
       dicts.UTM_Source.set(name, code);
     }
-    
-    const convertToInt = (dict, value) => {
-      if (typeof value === "undefined" || value === null) {
-        return 0;
-      }
-      const convertedValue = dicts[dict].get(value.toLowerCase());
-      return typeof convertedValue === "undefined" ? 0 : convertedValue;
-    };
 
     /* ----------------------------------------- */
 
@@ -164,9 +157,11 @@ async function run() {
         { format: "JSONEachRow" },
         err => {
           if (!err) {
-            visitsRawData.forEach(([msg]) => amqpCh.ack(msg))
+            visitsRawData.forEach(([msg]) => amqpCh.ack(msg));
+          } else {
+            console.log(err)
           }
-        }
+        } 
       );
 
       for (let i = 0; i < visitsRawData.length; i++) {
@@ -177,16 +172,22 @@ async function run() {
 
         clickhouseStream.write({
           userId: visitsRawData[i][1].userId,
-          app: visitsRawData[i][1].appId,
+          appId: visitsRawData[i][1].app,
           ip: visitsRawData[i][1].ip,
           ua: visitsRawData[i][1].ua,
           referer: visitsRawData[i][1].referer,
           pagePath: sourceURL.pathname,
-          UTM_Source: convertToInt('UTM_Source', sourceURL.searchParams.get('utm_source')), 
-          UTM_Medium: convertToInt('UTM_Medium', sourceURL.searchParams.get('utm_medium')), 
-          UTM_Campaign: sourceURL.searchParams.get('utm_campaign') || '', 
-          UTM_Content: sourceURL.searchParams.get('utm_content') || '', 
-          UTM_Term: sourceURL.searchParams.get('utm_term') || '', 
+          UTM_Source: convertToInt(
+            "UTM_Source",
+            sourceURL.searchParams.get("utm_source")
+          ),
+          UTM_Medium: convertToInt(
+            "UTM_Medium",
+            sourceURL.searchParams.get("utm_medium")
+          ),
+          UTM_Campaign: sourceURL.searchParams.get("utm_campaign") || "",
+          UTM_Content: sourceURL.searchParams.get("utm_content") || "",
+          UTM_Term: sourceURL.searchParams.get("utm_term") || "",
           browserName: convertToInt("browser", browser.name),
           browserMajorVersion: browser.major || 0,
           deviceType: convertToInt("deviceType", device.type),
@@ -197,6 +198,34 @@ async function run() {
           longitude: ll[0],
           latitude: ll[1]
         });
+        console.log({
+          userId: visitsRawData[i][1].userId,
+          appId: visitsRawData[i][1].app,
+          ip: visitsRawData[i][1].ip,
+          ua: visitsRawData[i][1].ua,
+          referer: visitsRawData[i][1].referer,
+          pagePath: sourceURL.pathname,
+          UTM_Source: convertToInt(
+            "UTM_Source",
+            sourceURL.searchParams.get("utm_source")
+          ),
+          UTM_Medium: convertToInt(
+            "UTM_Medium",
+            sourceURL.searchParams.get("utm_medium")
+          ),
+          UTM_Campaign: sourceURL.searchParams.get("utm_campaign") || "",
+          UTM_Content: sourceURL.searchParams.get("utm_content") || "",
+          UTM_Term: sourceURL.searchParams.get("utm_term") || "",
+          browserName: convertToInt("browser", browser.name),
+          browserMajorVersion: browser.major || 0,
+          deviceType: convertToInt("deviceType", device.type),
+          deviceVendor: convertToInt("deviceVendor", device.vendor),
+          operationSystem: convertToInt("operationSystem", os.name),
+          eventTime: date.toLocaleString(),
+          eventDate: date.toLocaleDateString(),
+          longitude: ll[0],
+          latitude: ll[1]
+        })
       }
 
       clickhouseStream.end();
@@ -211,7 +240,7 @@ async function run() {
         { format: "JSONEachRow" },
         err => {
           if (!err) {
-            eventsRawData.forEach(([msg]) => amqpCh.ack(msg))
+            eventsRawData.forEach(([msg]) => amqpCh.ack(msg));
           }
         }
       );
@@ -225,12 +254,12 @@ async function run() {
           questionId: eventsRawData[i][1].questionId,
           answerId: eventsRawData[i][1].answerId,
           eventTime: date.toLocaleString(),
-          eventDate: date.toLocaleDateString(),
+          eventDate: date.toLocaleDateString()
         });
       }
 
       clickhouseStream.end();
-    }   
+    }
 
     /* ----------------------------------------- */
 
@@ -241,7 +270,7 @@ async function run() {
         { format: "JSONEachRow" },
         err => {
           if (!err) {
-            recommsRawData.forEach(([msg]) => amqpCh.ack(msg))
+            recommsRawData.forEach(([msg]) => amqpCh.ack(msg));
           }
         }
       );
@@ -254,13 +283,12 @@ async function run() {
           fromUrl: recommsRawData[i][1].fromUrl,
           toUrl: recommsRawData[i][1].toUrl,
           eventTime: date.toLocaleString(),
-          eventDate: date.toLocaleDateString(),
+          eventDate: date.toLocaleDateString()
         });
       }
 
       clickhouseStream.end();
-
-    }      
+    }
 
     await timeout(1000);
   }
