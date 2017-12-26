@@ -179,6 +179,7 @@ async function run() {
           userId: visitsRawData[i][1].userId,
           app: visitsRawData[i][1].appId,
           ip: visitsRawData[i][1].ip,
+          ua: visitsRawData[i][1].ua,
           referer: visitsRawData[i][1].referer,
           pagePath: sourceURL.pathname,
           UTM_Source: convertToInt('UTM_Source', sourceURL.searchParams.get('utm_source')), 

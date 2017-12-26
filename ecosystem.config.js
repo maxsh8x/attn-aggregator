@@ -9,7 +9,6 @@ module.exports = {
     {
       name      : 'aggregator',
       script    : 'src/index.js',
-      exec_interpreter: '/home/deploy/.nvm/versions/node/v8.7.0/bin/node',
       env: {
         COMMON_VARIABLE: 'true'
       },
@@ -26,7 +25,7 @@ module.exports = {
   deploy : {
     production : {
       user : 'deploy',
-      host : '10.147.18.75',
+      host : '10.242.189.47',
       port: "22",
       ref  : 'origin/master',
       repo : 'git@gitlab.com:thesalt-common-projects/aggregator.git',
@@ -35,7 +34,7 @@ module.exports = {
     },
     dev : {
       user : 'deploy',
-      host : '10.147.18.75',
+      host : '10.242.189.47',
       port: "22",
       ref  : 'origin/master',
       repo : 'git@gitlab.com:thesalt-common-projects/aggregator.git',

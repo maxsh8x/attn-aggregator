@@ -3,6 +3,7 @@ CREATE TABLE aggregator_visits
     userId UInt32,
     appId Enum8('theanswer' = 1, 'thesalt' = 2),
     ip String,
+    ua String,
     referer String,
     pagePath String,
     UTM_Source UInt8,
