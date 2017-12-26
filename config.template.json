@@ -16,5 +16,6 @@
     "deviceType",
     "deviceVendor",
     "operationSystem"
-  ]
+  ],
+  "taskInterval": 1000
 }

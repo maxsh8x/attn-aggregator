@@ -9,7 +9,7 @@ const { URL } = require("url");
 
 const config = require("./utils/config");
 const { convertToInt } = require("./utils/converter");
-const { initDicts } = require("./utils/dicts");
+const { initDicts, fillDicts } = require("./utils/dicts");
 const models = require("./models");
 
 const app = express();
@@ -92,61 +92,8 @@ async function run() {
   const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   while (true) {
-    const dicts = initDicts(config.dictionaries)
-
-    const eventDictData = await models.Event.find({}, "-_id code name");
-    for (let i = 0; i < eventDictData.length; i++) {
-      const { code, name } = eventDictData[i];
-      dicts.event.set(name, code);
-    }
-
-    const browserDictData = await models.Browser.find({}, "-_id code name");
-    for (let i = 0; i < browserDictData.length; i++) {
-      const { code, name } = browserDictData[i];
-      dicts.browser.set(name, code);
-    }
-
-    const deviceTypeData = await models.DeviceType.find({}, "-_id code name");
-    for (let i = 0; i < deviceTypeData.length; i++) {
-      const { code, name } = deviceTypeData[i];
-      dicts.deviceType.set(name, code);
-    }
-
-    const deviceVendorData = await models.DeviceVendor.find(
-      {},
-      "-_id code name"
-    );
-    for (let i = 0; i < deviceVendorData.length; i++) {
-      const { code, name } = deviceVendorData[i];
-      dicts.deviceVendor.set(name, code);
-    }
-
-    const operationSystemData = await models.OperationSystem.find(
-      {},
-      "-_id code name"
-    );
-    for (let i = 0; i < operationSystemData.length; i++) {
-      const { code, name } = operationSystemData[i];
-      dicts.operationSystem.set(name, code);
-    }
-
-    const UTM_MediumData = await models.OperationSystem.find(
-      {},
-      "-_id code name"
-    );
-    for (let i = 0; i < UTM_MediumData.length; i++) {
-      const { code, name } = UTM_MediumData[i];
-      dicts.UTM_Medium.set(name, code);
-    }
-
-    const UTM_SourceData = await models.OperationSystem.find(
-      {},
-      "-_id code name"
-    );
-    for (let i = 0; i < UTM_SourceData.length; i++) {
-      const { code, name } = UTM_SourceData[i];
-      dicts.UTM_Source.set(name, code);
-    }
+    const dicts = initDicts(config.dictionaries);
+    await fillDicts(dicts);
 
     /* ----------------------------------------- */
 
@@ -159,7 +106,7 @@ async function run() {
           if (!err) {
             visitsRawData.forEach(([msg]) => amqpCh.ack(msg));
           }
-        } 
+        }
       );
 
       for (let i = 0; i < visitsRawData.length; i++) {
@@ -196,6 +143,7 @@ async function run() {
           longitude: ll[0],
           latitude: ll[1]
         });
+      }
 
       clickhouseStream.end();
     }
@@ -259,7 +207,7 @@ async function run() {
       clickhouseStream.end();
     }
 
-    await timeout(1000);
+    await timeout(config.taskInterval);
   }
 }
 
