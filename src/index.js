@@ -158,8 +158,6 @@ async function run() {
         err => {
           if (!err) {
             visitsRawData.forEach(([msg]) => amqpCh.ack(msg));
-          } else {
-            console.log(err)
           }
         } 
       );
@@ -198,35 +196,6 @@ async function run() {
           longitude: ll[0],
           latitude: ll[1]
         });
-        console.log({
-          userId: visitsRawData[i][1].userId,
-          appId: visitsRawData[i][1].app,
-          ip: visitsRawData[i][1].ip,
-          ua: visitsRawData[i][1].ua,
-          referer: visitsRawData[i][1].referer,
-          pagePath: sourceURL.pathname,
-          UTM_Source: convertToInt(
-            "UTM_Source",
-            sourceURL.searchParams.get("utm_source")
-          ),
-          UTM_Medium: convertToInt(
-            "UTM_Medium",
-            sourceURL.searchParams.get("utm_medium")
-          ),
-          UTM_Campaign: sourceURL.searchParams.get("utm_campaign") || "",
-          UTM_Content: sourceURL.searchParams.get("utm_content") || "",
-          UTM_Term: sourceURL.searchParams.get("utm_term") || "",
-          browserName: convertToInt("browser", browser.name),
-          browserMajorVersion: browser.major || 0,
-          deviceType: convertToInt("deviceType", device.type),
-          deviceVendor: convertToInt("deviceVendor", device.vendor),
-          operationSystem: convertToInt("operationSystem", os.name),
-          eventTime: date.toLocaleString(),
-          eventDate: date.toLocaleDateString(),
-          longitude: ll[0],
-          latitude: ll[1]
-        })
-      }
 
       clickhouseStream.end();
     }
