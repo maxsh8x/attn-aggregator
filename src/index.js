@@ -22,9 +22,9 @@ async function run() {
   const amqpConn = await amqp.connect(config.amqp.host);
   const amqpCh = await amqpConn.createChannel();
 
-  await amqpCh.assertQueue("visits", { durable: true });
-  await amqpCh.assertQueue("events", { durable: true });
-  await amqpCh.assertQueue("recommendations", { durable: true });
+  for (let queue of ["visits", "events", "recommendations"]) {
+    await amqpCh.assertQueue(queue, { durable: true });
+  }
 
   const clickhouseConn = new ClickHouse(config.clickhouse);
 
@@ -106,7 +106,7 @@ async function run() {
           if (!err) {
             visitsRawData.forEach(([msg]) => amqpCh.ack(msg));
           } else {
-            console.log(err)
+            console.error(err)
           }
         }
       );
