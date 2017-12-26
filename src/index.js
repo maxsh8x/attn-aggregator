@@ -105,34 +105,36 @@ async function run() {
         err => {
           if (!err) {
             visitsRawData.forEach(([msg]) => amqpCh.ack(msg));
+          } else {
+            console.log(err)
           }
         }
       );
 
-      for (let i = 0; i < visitsRawData.length; i++) {
-        const { browser, device, os } = parser(visitsRawData[i][1].ua);
-        const { ll } = geoip.lookup(visitsRawData[i][1].ip);
-        const date = new Date(visitsRawData[i][1].timestamp * 1000);
-        const sourceURL = new URL(visitsRawData[i][1].pageUrl);
+      for (let [, item] of visitsRawData) {
+        const { browser, device, os } = parser(item.ua);
+        const { ll } = geoip.lookup(item.ip);
+        const date = new Date(item.timestamp * 1000);
+        const sourceURL = new URL(item.pageUrl);
 
         clickhouseStream.write({
-          userId: visitsRawData[i][1].userId,
-          appId: visitsRawData[i][1].app,
-          ip: visitsRawData[i][1].ip,
-          ua: visitsRawData[i][1].ua,
-          referer: visitsRawData[i][1].referer,
+          userId: item.userId,
+          appId: item.app,
+          ip: item.ip,
+          ua: item.ua,
+          referer: item.referer,
           pagePath: sourceURL.pathname,
-          UTM_Source: convertToInt(
-            "UTM_Source",
+          UTMSource: convertToInt(
+            "UTMSource",
             sourceURL.searchParams.get("utm_source")
           ),
-          UTM_Medium: convertToInt(
-            "UTM_Medium",
+          UTMMedium: convertToInt(
+            "UTMMedium",
             sourceURL.searchParams.get("utm_medium")
           ),
-          UTM_Campaign: sourceURL.searchParams.get("utm_campaign") || "",
-          UTM_Content: sourceURL.searchParams.get("utm_content") || "",
-          UTM_Term: sourceURL.searchParams.get("utm_term") || "",
+          UTMCampaign: sourceURL.searchParams.get("utm_campaign") || "",
+          UTMContent: sourceURL.searchParams.get("utm_content") || "",
+          UTMTerm: sourceURL.searchParams.get("utm_term") || "",
           browserName: convertToInt("browser", browser.name),
           browserMajorVersion: browser.major || 0,
           deviceType: convertToInt("deviceType", device.type),
@@ -162,14 +164,14 @@ async function run() {
         }
       );
 
-      for (let i = 0; i < eventsRawData.length; i++) {
-        const date = new Date(eventsRawData[i][1].timestamp * 1000);
+      for (let [, item] of eventsRawData) {
+        const date = new Date(item.timestamp * 1000);
         clickhouseStream.write({
-          userId: eventsRawData[i][1].userId,
-          appId: eventsRawData[i][1].app,
-          eventId: convertToInt("event", eventsRawData[i][1].event),
-          questionId: eventsRawData[i][1].questionId,
-          answerId: eventsRawData[i][1].answerId,
+          userId: item.userId,
+          appId: item.app,
+          eventId: convertToInt("event", item.event),
+          questionId: item.questionId,
+          answerId: item.answerId,
           eventTime: date.toLocaleString(),
           eventDate: date.toLocaleDateString()
         });
@@ -192,13 +194,13 @@ async function run() {
         }
       );
 
-      for (let i = 0; i < recommsRawData.length; i++) {
-        const date = new Date(recommsRawData[i][1].timestamp * 1000);
+      for (let [, item] of recommsRawData) {
+        const date = new Date(item.timestamp * 1000);
         clickhouseStream.write({
-          userId: recommsRawData[i][1].userId,
-          appId: recommsRawData[i][1].app,
-          fromUrl: recommsRawData[i][1].fromUrl,
-          toUrl: recommsRawData[i][1].toUrl,
+          userId: item.userId,
+          appId: item.app,
+          fromUrl: item.fromUrl,
+          toUrl: item.toUrl,
           eventTime: date.toLocaleString(),
           eventDate: date.toLocaleDateString()
         });

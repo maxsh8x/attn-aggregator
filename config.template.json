@@ -11,8 +11,8 @@
   "dictionaries": [
     "event",
     "browser",
-    "UTM_Medium",
-    "UTM_Source",
+    "UTMMedium",
+    "UTMSource",
     "deviceType",
     "deviceVendor",
     "operationSystem"
