@@ -1,8 +1,6 @@
 const amqp = require("amqplib");
-const express = require("express");
 const geoip = require("geoip-lite");
 const parser = require("ua-parser-js");
-const bodyParser = require("body-parser");
 const ClickHouse = require("@apla/clickhouse");
 const { URL } = require("url");
 
