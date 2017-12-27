@@ -18,7 +18,7 @@ function GetModels() {
     Data.index({ code: 1 }, { unique: true });
     Data.index({ name: 1 }, { unique: true });
     const modelName = modelByDict(dictName);
-    models[modelName] = mongoose.model(modelName, Data);
+    models[modelName] = mongoose.model(modelName, Data, modelName);
   }
   return models;
 }
