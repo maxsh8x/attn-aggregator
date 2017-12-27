@@ -25,7 +25,7 @@ module.exports = {
   deploy : {
     production : {
       user : 'deploy',
-      host : '10.242.189.47',
+      host : '10.147.18.64',
       port: "22",
       ref  : 'origin/master',
       repo : 'git@gitlab.com:thesalt-common-projects/aggregator.git',
@@ -34,7 +34,7 @@ module.exports = {
     },
     dev : {
       user : 'deploy',
-      host : '10.242.189.47',
+      host : '10.147.18.64',
       port: "22",
       ref  : 'origin/master',
       repo : 'git@gitlab.com:thesalt-common-projects/aggregator.git',
