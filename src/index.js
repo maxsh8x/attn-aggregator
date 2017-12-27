@@ -4,7 +4,7 @@ const parser = require("ua-parser-js");
 const bodyParser = require("body-parser");
 
 const config = require("./lib/config");
-const { runTasks } = require("./tasker");
+const { runTasks } = require("./task");
 const models = require("./models");
 const { modelByDict } = require("./lib/name");
 
