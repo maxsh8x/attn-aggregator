@@ -9,7 +9,8 @@ function GetModels() {
   for (let dictName of config.dictionaries) {
     const Data = mongoose.Schema({
       name: String,
-      code: Number
+      code: Number,
+      description: String,
     });
     Data.plugin(AutoIncrement, {
       inc_field: "code",
