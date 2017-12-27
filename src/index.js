@@ -18,7 +18,11 @@ async function run() {
   for (let dictName of config.dictionaries) {
     const modelName = modelByDict(dictName);
     app.post(`/api/v1/${modelName}`, async function({ body: { name } }, res) {
+      if (typeof name !== 'string') {
+        return res.status(400).send('name must be string')
+      }
       await new models[modelName]({ name }).save();
+      res.send('ok')
     });
   }
 
