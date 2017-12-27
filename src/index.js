@@ -7,9 +7,9 @@ const bodyParser = require("body-parser");
 const ClickHouse = require("@apla/clickhouse");
 const { URL } = require("url");
 
-const config = require("./utils/config");
-const { convertToInt } = require("./utils/converter");
-const { initDicts, fillDicts } = require("./utils/dicts");
+const config = require("./lib/config");
+const { convertToInt } = require("./lib/converter");
+const { initDicts, fillDicts } = require("./lib/dicts");
 const models = require("./models");
 
 const app = express();
