@@ -11,14 +11,11 @@ const initDicts = dictNames => {
 
 async function fillDicts(dicts) {
   for (let dictName in dicts) {
-    const data = await models[modelByDict(dictName)].find(
-      {},
-      "-_id code name"
-    );
+    const data = await models[modelByDict(dictName)].find({}, "-_id code name");
     for (let { code, name } of data) {
       dicts[dictName].set(name, code);
     }
-  } 
-};
+  }
+}
 
 module.exports = { initDicts, fillDicts };
