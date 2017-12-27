@@ -84,21 +84,21 @@ async function runTasks() {
           referer: item.referer,
           pagePath: sourceURL.pathname,
           UTMSource: convertToInt(
-            "UTMSource",
+            dicts.UTMSource,
             sourceURL.searchParams.get("utm_source")
           ),
           UTMMedium: convertToInt(
-            "UTMMedium",
+            dicts.UTMMedium,
             sourceURL.searchParams.get("utm_medium")
           ),
           UTMCampaign: sourceURL.searchParams.get("utm_campaign") || "",
           UTMContent: sourceURL.searchParams.get("utm_content") || "",
           UTMTerm: sourceURL.searchParams.get("utm_term") || "",
-          browserName: convertToInt("browser", browser.name),
+          browserName: convertToInt(dicts.browser, browser.name),
           browserMajorVersion: browser.major || 0,
-          deviceType: convertToInt("deviceType", device.type),
-          deviceVendor: convertToInt("deviceVendor", device.vendor),
-          operationSystem: convertToInt("operationSystem", os.name),
+          deviceType: convertToInt(dicts.deviceType, device.type),
+          deviceVendor: convertToInt(dicts.deviceVendor, device.vendor),
+          operationSystem: convertToInt(dicts.operationSystem, os.name),
           eventTime: date.toLocaleString(),
           eventDate: date.toLocaleDateString(),
           longitude: ll[0],
@@ -128,7 +128,7 @@ async function runTasks() {
         clickhouseStream.write({
           userId: item.userId,
           appId: item.app,
-          eventId: convertToInt("event", item.event),
+          eventId: convertToInt(dicts.event, item.event),
           questionId: item.questionId,
           answerId: item.answerId,
           eventTime: date.toLocaleString(),
