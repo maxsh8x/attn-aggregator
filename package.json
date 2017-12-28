@@ -17,6 +17,8 @@
     "clickhouse": "^1.1.4",
     "express": "^4.16.2",
     "geoip-lite": "^1.2.1",
+    "ip-to-int": "^0.3.1",
+    "joi": "^13.0.2",
     "mongoose": "^4.13.7",
     "mongoose-sequence": "^4.0.1",
     "ua-parser-js": "^0.7.17"

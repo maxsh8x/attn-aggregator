@@ -6,6 +6,7 @@ const { initDicts, fillDicts } = require("../lib/dicts");
 const models = require("../models");
 const consumers = require("./consumers");
 const processers = require("./processers");
+const validators = require("./validators");
 
 const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -24,6 +25,10 @@ async function runTasks() {
     buffers[name] = [];
     amqpCh.consume(name, msg => {
       const data = JSON.parse(msg.content);
+      const validationResult = validators[name].validate(data)
+      if (validationResult.error !== null) {
+        return amqpCh.reject(msg)
+      }
       const timestamp = new Date(msg.properties.timestamp * 1000);
       const result = consumers[name](timestamp, data);
       buffers[name].push([

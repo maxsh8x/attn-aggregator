@@ -1,6 +1,8 @@
 const parser = require("ua-parser-js");
 const geoip = require("geoip-lite");
+const ipInt = require('ip-to-int');
 const { URL } = require("url");
+
 
 const { convertToInt } = require("../lib/converter");
 
@@ -12,7 +14,7 @@ const processers = {
     return {
       userId: item.userId,
       appId: item.app,
-      ip: item.ip,
+      ip: ipInt(item.ip).toInt(),
       ua: item.ua,
       referer: item.referer,
       pagePath: sourceURL.pathname,
