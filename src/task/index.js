@@ -17,7 +17,7 @@ async function runTasks() {
 
   const buffers = {};
 
-  for (let queue in consumers) {
+  for (let queue of [...Object.keys(consumers), 'error']) {
     await amqpCh.assertQueue(queue, { durable: true });
   }
 
@@ -27,18 +27,20 @@ async function runTasks() {
       const data = JSON.parse(msg.content);
       const validationResult = validators[name].validate(data)
       if (validationResult.error !== null) {
-        return amqpCh.reject(msg)
+        amqpCh.sendToQueue('error', Buffer.from(msg.content))
+        amqpCh.ack(msg)
+      } else {
+        const timestamp = new Date(msg.properties.timestamp * 1000);
+        const result = consumers[name](timestamp, data);
+        buffers[name].push([
+          msg,
+          {
+            ...result,
+            eventTime: timestamp.toLocaleString(),
+            eventDate: timestamp.toLocaleDateString()
+          }
+        ]);
       }
-      const timestamp = new Date(msg.properties.timestamp * 1000);
-      const result = consumers[name](timestamp, data);
-      buffers[name].push([
-        msg,
-        {
-          ...result,
-          eventTime: timestamp.toLocaleString(),
-          eventDate: timestamp.toLocaleDateString()
-        }
-      ]);
     });
   });
 
