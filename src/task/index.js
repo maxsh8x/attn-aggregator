@@ -1,3 +1,4 @@
+const Joi = require("joi");
 const amqp = require("amqplib");
 const ClickHouse = require("@apla/clickhouse");
 
@@ -9,6 +10,7 @@ const processers = require("./processers");
 const validators = require("./validators");
 
 const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
+const timestampSchema = Joi.date().timestamp("unix");
 
 async function runTasks() {
   const amqpConn = await amqp.connect(config.amqp.host);
@@ -17,7 +19,7 @@ async function runTasks() {
 
   const buffers = {};
 
-  for (let queue of [...Object.keys(consumers), 'error']) {
+  for (let queue of [...Object.keys(consumers), "error"]) {
     await amqpCh.assertQueue(queue, { durable: true });
   }
 
@@ -25,10 +27,15 @@ async function runTasks() {
     buffers[name] = [];
     amqpCh.consume(name, msg => {
       const data = JSON.parse(msg.content);
-      const validationResult = validators[name].validate(data)
-      if (validationResult.error !== null) {
-        amqpCh.sendToQueue('error', Buffer.from(msg.content))
-        amqpCh.ack(msg)
+      const isBodyValid = validators[name].validate(data);
+      const isTsValid = timestampSchema.validate(msg.properties.timestamp);
+      console.log(isTsValid)
+      console.log(msg.properties.timestamp)
+      if (isBodyValid.error !== null || isTsValid.error !== null) {
+        amqpCh.sendToQueue("error", Buffer.from(msg.content), {
+          timestamp: msg.properties.timestamp
+        });
+        amqpCh.ack(msg);
       } else {
         const timestamp = new Date(msg.properties.timestamp * 1000);
         const result = consumers[name](timestamp, data);
