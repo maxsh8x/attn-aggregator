@@ -29,8 +29,6 @@ async function runTasks() {
       const data = JSON.parse(msg.content);
       const isBodyValid = validators[name].validate(data);
       const isTsValid = timestampSchema.validate(msg.properties.timestamp);
-      console.log(isTsValid)
-      console.log(msg.properties.timestamp)
       if (isBodyValid.error !== null || isTsValid.error !== null) {
         amqpCh.sendToQueue("error", Buffer.from(msg.content), {
           timestamp: msg.properties.timestamp
